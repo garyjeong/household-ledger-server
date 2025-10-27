@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: household-ledger-db
+    environment:
+      MYSQL_ROOT_PASSWORD: wjdwhdans
+      MYSQL_DATABASE: household_ledger
+      MYSQL_USER: gary
+      MYSQL_PASSWORD: wjdwhdans
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  api:
+    build: .
+    container_name: household-ledger-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./app:/app/app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: mysql+pymysql://gary:wjdwhdans@db:3306/household_ledger
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-change-in-production}
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+

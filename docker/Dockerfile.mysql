@@ -1,0 +1,15 @@
+# MySQL 8.4 Local Development Database
+FROM mysql:8.4
+
+# 환경 변수 설정
+ENV MYSQL_ROOT_PASSWORD=wjdwhdans
+ENV MYSQL_DATABASE=household_ledger
+ENV MYSQL_USER=gary
+ENV MYSQL_PASSWORD=wjdwhdans
+
+# 초기화 스크립트 (선택적)
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# 포트 노출
+EXPOSE 3306
+
