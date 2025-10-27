@@ -1,0 +1,96 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FastAPI: Debug Mode",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--reload",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "jinja": true,
+      "justMyCode": false,
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DATABASE_URL": "mysql+pymysql://gary:wjdwhdans@localhost:3306/household_ledger",
+        "JWT_SECRET": "your-secret-key-change-in-production",
+        "JWT_REFRESH_SECRET": "your-refresh-secret-change-in-production",
+        "CORS_ORIGINS": "http://localhost:3001,http://localhost:3000"
+      },
+      "python": "${workspaceFolder}/.venv/bin/python"
+    },
+    {
+      "name": "FastAPI: Production Mode",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "jinja": true,
+      "justMyCode": false,
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "DATABASE_URL": "mysql+pymysql://gary:wjdwhdans@localhost:3306/household_ledger",
+        "JWT_SECRET": "your-secret-key-change-in-production",
+        "JWT_REFRESH_SECRET": "your-refresh-secret-change-in-production",
+        "CORS_ORIGINS": "http://localhost:3001,http://localhost:3000"
+      },
+      "python": "${workspaceFolder}/.venv/bin/python"
+    },
+    {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "python": "${workspaceFolder}/.venv/bin/python"
+    },
+    {
+      "name": "Python: Pytest Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "${file}",
+        "-v",
+        "-s"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "python": "${workspaceFolder}/.venv/bin/python"
+    },
+    {
+      "name": "Python: All Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "tests/",
+        "-v",
+        "-s",
+        "--tb=short"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false,
+      "python": "${workspaceFolder}/.venv/bin/python"
+    }
+  ]
+}
+

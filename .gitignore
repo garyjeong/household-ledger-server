@@ -10,10 +10,11 @@ venv/
 ENV/
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
+# Keep .vscode for team settings
+!.vscode/
 
 # Environment
 .env
