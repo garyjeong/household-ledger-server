@@ -1,19 +1,41 @@
-# Docker Database Setup
+# Docker 설정 가이드
 
-로컬 개발용 MySQL 데이터베이스 Docker 설정
+가계부 서버의 Docker 컨테이너 설정
 
-## 📦 사용 방법
+## 📁 폴더 구조
 
-### 1. Docker 이미지 빌드
-
-```bash
-cd docker
-docker build -t household-ledger-mysql:latest -f Dockerfile.mysql .
+```
+docker/
+├── database/        # MySQL 데이터베이스 설정
+│   ├── Dockerfile.mysql
+│   ├── init.sql
+│   └── start-db.sh
+├── server/          # FastAPI 서버 설정
+│   ├── Dockerfile
+│   └── .dockerignore
+└── README.md        # 이 파일
 ```
 
-### 2. 컨테이너 실행
+---
+
+## 🗄️ Database 설정 (docker/database/)
+
+### 빠른 시작
 
 ```bash
+cd docker/database
+./start-db.sh
+```
+
+### 수동 실행
+
+```bash
+cd docker/database
+
+# 1. Docker 이미지 빌드
+docker build -t household-ledger-mysql:latest -f Dockerfile.mysql .
+
+# 2. 컨테이너 실행
 docker run -d \
   --name household-ledger-db \
   -p 3306:3306 \
@@ -24,48 +46,67 @@ docker run -d \
   household-ledger-mysql:latest
 ```
 
-### 3. 컨테이너 상태 확인
+### 연결 정보
+
+- **Host**: `127.0.0.1`
+- **Port**: `3306`
+- **User**: `gary`
+- **Password**: `wjdwhdans`
+- **Database**: `household_ledger`
+
+### 컨테이너 관리
 
 ```bash
-docker ps
-```
+# 상태 확인
+docker ps | grep household-ledger-db
 
-### 4. 로그 확인
-
-```bash
+# 로그 확인
 docker logs household-ledger-db
-```
 
-### 5. 데이터베이스 연결
-
-**MySQL 클라이언트로 연결:**
-```bash
-mysql -h 127.0.0.1 -P 3306 -u gary -pwjdwhdans household_ledger
-```
-
-**연결 정보:**
-- Host: `127.0.0.1`
-- Port: `3306`
-- User: `gary`
-- Password: `wjdwhdans`
-- Database: `household_ledger`
-
-**Root 접속:**
-```bash
-mysql -h 127.0.0.1 -P 3306 -u root -pwjdwhdans
-```
-
-### 6. 컨테이너 중지 및 삭제
-
-```bash
 # 중지
 docker stop household-ledger-db
 
 # 삭제
 docker rm household-ledger-db
+```
 
-# 이미지 삭제
-docker rmi household-ledger-mysql:latest
+---
+
+## 🚀 Server 설정 (docker/server/)
+
+### 프로덕션 빌드
+
+```bash
+cd docker/server
+docker build -t household-ledger-api:latest -f Dockerfile ../../
+
+# 컨테이너 실행
+docker run -d \
+  --name household-ledger-api \
+  -p 8000:8000 \
+  -e DATABASE_URL=mysql+pymysql://gary:wjdwhdans@host.docker.internal:3306/household_ledger \
+  household-ledger-api:latest
+```
+
+### 개발 모드
+
+```bash
+# 로컬에서 실행
+cd /Users/gary/Documents/workspace/household-ledger-server
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+---
+
+## 📊 컨테이너 상태 확인
+
+```bash
+# 실행 중인 컨테이너 확인
+docker ps
+
+# 모든 컨테이너 확인 (중지된 것 포함)
+docker ps -a
 ```
 
 ---
@@ -90,6 +131,8 @@ docker exec -i household-ledger-db mysql \
 
 ## 🔧 환경 변수
 
+### Database
+
 | 변수 | 기본값 | 설명 |
 |------|--------|------|
 | MYSQL_ROOT_PASSWORD | wjdwhdans | Root 비밀번호 |
@@ -97,13 +140,19 @@ docker exec -i household-ledger-db mysql \
 | MYSQL_USER | gary | 애플리케이션 사용자 |
 | MYSQL_PASSWORD | wjdwhdans | 애플리케이션 비밀번호 |
 
+### Server
+
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| DATABASE_URL | mysql+pymysql://gary:wjdwhdans@localhost:3306/household_ledger | DB 연결 URL |
+| JWT_SECRET | your-secret-key | JWT 시크릿 |
+| JWT_REFRESH_SECRET | your-refresh-secret | JWT 갱신 시크릿 |
+
 ---
 
-## 📝 참고사항
+## ⚠️ 참고사항
 
-- 초기화 스크립트(`init.sql`)는 컨테이너 최초 생성 시에만 실행됩니다.
 - 데이터 영속성을 원한다면 볼륨 마운트를 추가하세요:
-
 ```bash
 docker run -d \
   --name household-ledger-db \
@@ -111,21 +160,3 @@ docker run -d \
   -v household-ledger-data:/var/lib/mysql \
   household-ledger-mysql:latest
 ```
-
-- 빠른 시작 스크립트:
-
-```bash
-# docker/start-db.sh
-#!/bin/bash
-docker run -d \
-  --name household-ledger-db \
-  -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=wjdwhdans \
-  -e MYSQL_DATABASE=household_ledger \
-  -e MYSQL_USER=gary \
-  -e MYSQL_PASSWORD=wjdwhdans \
-  household-ledger-mysql:latest
-
-echo "✅ Database started on localhost:3306"
-```
-

@@ -23,7 +23,7 @@ fi
 # Build image (if not exists)
 if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^household-ledger-mysql:latest$"; then
     echo "📦 Building MySQL image..."
-    docker build -t household-ledger-mysql:latest -f Dockerfile.mysql .
+    docker build -t household-ledger-mysql:latest -f "$(dirname "$0")/Dockerfile.mysql" "$(dirname "$0")"
 fi
 
 # Run container
