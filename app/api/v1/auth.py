@@ -12,7 +12,9 @@ from app.schemas.auth import (
     AccessTokenResponse,
     UserProfileResponse,
     ChangePasswordRequest,
-    RefreshTokenRequest
+    RefreshTokenRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest
 )
 from app.dependencies import get_auth_service, get_current_user
 from app.application.services.auth_service import AuthService
@@ -211,4 +213,59 @@ async def check_email(email: str):
     """Check if email is available"""
     # TODO: Implement email check logic
     return {"available": True, "email": email}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    """
+    Request password reset
+    
+    - **email**: User email address
+    
+    Note: In production, this should send an email with reset link.
+    For development, the reset token is returned in the response.
+    """
+    try:
+        reset_token = await service.forgot_password(request.email)
+        
+        # TODO: In production, send email with reset link instead of returning token
+        # For now, return token for development/testing
+        return {
+            "success": True,
+            "message": "비밀번호 재설정 링크가 이메일로 전송되었습니다",
+            "token": reset_token  # Remove in production
+        }
+    except ValueError as e:
+        # Don't reveal if email exists for security
+        return {
+            "success": True,
+            "message": "비밀번호 재설정 링크가 이메일로 전송되었습니다"
+        }
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPasswordRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    """
+    Reset password using reset token
+    
+    - **token**: Password reset token from forgot-password endpoint
+    - **new_password**: New password (min 8 characters)
+    """
+    try:
+        await service.reset_password(request.token, request.new_password)
+        return {
+            "success": True,
+            "message": "비밀번호가 성공적으로 변경되었습니다"
+        }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 

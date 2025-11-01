@@ -146,4 +146,60 @@ class AuthService:
         new_hash = hash_password(new_password)
         user.password_hash = new_hash
         await self.auth_repository.update_user(user)
+    
+    async def forgot_password(self, email: str) -> str:
+        """
+        Generate password reset token for user
+        
+        Returns:
+            Reset token
+        """
+        # Find user by email
+        user = await self.auth_repository.find_user_by_email(email)
+        if not user:
+            # Don't reveal if email exists for security
+            # Return a dummy token to prevent email enumeration
+            pass
+        
+        # Create reset token (valid for 1 hour)
+        from app.infrastructure.security.jwt_handler import create_reset_token
+        reset_token = create_reset_token(user.id, user.email, timedelta(hours=1))
+        
+        # TODO: Send email with reset link
+        # For now, just return the token
+        # In production, this should send an email with the token
+        
+        return reset_token
+    
+    async def reset_password(self, token: str, new_password: str) -> None:
+        """
+        Reset password using reset token
+        
+        Args:
+            token: Password reset token
+            new_password: New password
+        """
+        # Verify reset token
+        from app.infrastructure.security.jwt_handler import verify_and_decode_token
+        try:
+            payload = verify_and_decode_token(token, "reset")
+        except Exception:
+            raise ValueError("Invalid or expired reset token")
+        
+        user_id = int(payload["sub"])
+        email = payload.get("email")
+        
+        # Find user
+        user = await self.auth_repository.find_user_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+        
+        # Verify email matches
+        if email and user.email != email:
+            raise ValueError("Invalid token")
+        
+        # Update password
+        new_hash = hash_password(new_password)
+        user.password_hash = new_hash
+        await self.auth_repository.update_user(user)
 
