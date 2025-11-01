@@ -21,8 +21,9 @@ class TransactionRepository(Protocol):
         start_date: Optional[datetime],
         end_date: Optional[datetime],
         category_id: Optional[int],
-        limit: int,
-        offset: int
+        search: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0
     ) -> List[Transaction]:
         """Find transactions with filters and pagination"""
         ...
@@ -33,7 +34,8 @@ class TransactionRepository(Protocol):
         user_id: Optional[int],
         start_date: Optional[datetime],
         end_date: Optional[datetime],
-        category_id: Optional[int]
+        category_id: Optional[int],
+        search: Optional[str] = None
     ) -> int:
         """Count total transactions with filters"""
         ...

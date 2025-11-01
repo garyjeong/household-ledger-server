@@ -20,6 +20,14 @@ from typing import Optional
 
 router = APIRouter()
 
+# Include quick-add router
+try:
+    from app.api.v1.transactions.quick_add import router as quick_add_router
+    router.include_router(quick_add_router, prefix="/quick-add", tags=["Transactions"])
+except ImportError:
+    # Quick-add router not available, skip
+    pass
+
 
 @router.get("", response_model=PaginatedResponse)
 async def get_transactions(
@@ -27,6 +35,7 @@ async def get_transactions(
     start_date: Optional[date] = Query(None),
     end_date: Optional[date] = Query(None),
     category_id: Optional[int] = Query(None),
+    search: Optional[str] = Query(None, description="Search in memo and merchant"),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
@@ -39,6 +48,7 @@ async def get_transactions(
         start_date=start_date,
         end_date=end_date,
         category_id=category_id,
+        search=search,
         limit=limit,
         offset=offset
     )

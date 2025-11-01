@@ -4,10 +4,17 @@ Application Configuration
 
 from pydantic_settings import BaseSettings
 from typing import List
+from pydantic import field_validator, ConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings"""
+    
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        env_file_encoding="utf-8"
+    )
     
     # Database
     database_url: str = "mysql+pymysql://gary:wjdwhdans@localhost:3306/household_ledger"
@@ -19,8 +26,16 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
     
-    # CORS
-    cors_origins: List[str] = ["http://localhost:3001", "http://localhost:3000"]
+    # CORS - accept comma-separated string from env, default to list
+    cors_origins_str: str | None = None
+    
+    @property
+    def cors_origins(self) -> List[str]:
+        """Parse CORS origins from environment variable or return default"""
+        if self.cors_origins_str:
+            # Parse comma-separated string
+            return [origin.strip() for origin in self.cors_origins_str.split(",") if origin.strip()]
+        return ["http://localhost:3001", "http://localhost:3000"]
     
     # OCR
     ocr_provider: str = "easyocr"
@@ -29,10 +44,6 @@ class Settings(BaseSettings):
     # File Upload
     upload_dir: str = "./uploads"
     max_upload_size: int = 10485760  # 10MB
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
 
 
 settings = Settings()

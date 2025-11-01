@@ -6,7 +6,7 @@ ORM-based repository for transactions
 from typing import Optional
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func
+from sqlalchemy import select, and_, or_, func
 from sqlalchemy.orm import selectinload
 from app.domain.models.transaction import Transaction
 from app.domain.repositories.transaction_repository import TransactionRepository
@@ -33,12 +33,13 @@ class TransactionRepositoryImpl(TransactionRepository):
     async def find_all(
         self,
         group_id: Optional[int],
-        user_id: int: Optional[None],
-        start_date: datetime: Optional[None],
-        end_date: datetime: Optional[None],
+        user_id: Optional[int],
+        start_date: Optional[datetime],
+        end_date: Optional[datetime],
         category_id: Optional[int],
-        limit: int,
-        offset: int
+        search: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0
     ) -> list[Transaction]:
         """Find transactions with filters and pagination using ORM"""
         stmt = select(Transaction)
@@ -55,6 +56,14 @@ class TransactionRepositoryImpl(TransactionRepository):
             filters.append(Transaction.date <= end_date)
         if category_id is not None:
             filters.append(Transaction.category_id == category_id)
+        
+        # Search filter (memo or merchant)
+        if search:
+            search_filter = or_(
+                Transaction.memo.like(f"%{search}%"),
+                Transaction.merchant.like(f"%{search}%")
+            )
+            filters.append(search_filter)
         
         if filters:
             stmt = stmt.where(and_(*filters))
@@ -75,10 +84,11 @@ class TransactionRepositoryImpl(TransactionRepository):
     async def count_total(
         self,
         group_id: Optional[int],
-        user_id: int: Optional[None],
-        start_date: datetime: Optional[None],
-        end_date: datetime: Optional[None],
-        category_id: Optional[int]
+        user_id: Optional[int],
+        start_date: Optional[datetime],
+        end_date: Optional[datetime],
+        category_id: Optional[int],
+        search: Optional[str] = None
     ) -> int:
         """Count total transactions with filters"""
         stmt = select(func.count(Transaction.id))
@@ -94,6 +104,14 @@ class TransactionRepositoryImpl(TransactionRepository):
             filters.append(Transaction.date <= end_date)
         if category_id is not None:
             filters.append(Transaction.category_id == category_id)
+        
+        # Search filter (memo or merchant)
+        if search:
+            search_filter = or_(
+                Transaction.memo.like(f"%{search}%"),
+                Transaction.merchant.like(f"%{search}%")
+            )
+            filters.append(search_filter)
         
         if filters:
             stmt = stmt.where(and_(*filters))

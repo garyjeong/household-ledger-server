@@ -120,6 +120,37 @@ JWT_REFRESH_SECRET=your-refresh-secret-change-in-production
 - `PUT /{category_id}` - 카테고리 수정
 - `DELETE /{category_id}` - 카테고리 삭제
 
+### 📊 통계 (Statistics) - `/api/v1/statistics`
+- `GET /` - 종합 통계 조회
+  - 요약 통계 (총 수입, 지출, 순이익, 거래 건수)
+  - 카테고리별 통계 (수입/지출)
+  - 일별 트렌드 데이터
+  - 월별 비교 (최근 6개월)
+  - 기간 필터: `current-month`, `last-month`, `last-3-months`, `last-6-months`, `year`
+
+### 📈 대시보드 (Dashboard) - `/api/v1/dashboard`
+- `GET /monthly-stats` - 월별 대시보드 통계
+  - 월별 수입/지출 총액
+  - 상위 5개 지출 카테고리
+  - 일별 트렌드
+
+### 🔄 반복 거래 (RecurringRules) - `/api/v1/recurring-rules`
+- `GET /` - 반복 거래 규칙 목록 조회
+- `POST /` - 반복 거래 규칙 생성
+- `GET /{rule_id}` - 반복 거래 규칙 조회
+- `PUT /{rule_id}` - 반복 거래 규칙 수정
+- `DELETE /{rule_id}` - 반복 거래 규칙 삭제
+- `POST /process` - 반복 거래 규칙 일괄 처리 (자동 거래 생성)
+- `POST /{rule_id}/generate` - 특정 규칙에서 거래 생성
+
+### 💰 예산 (Budgets) - `/api/v1/budgets`
+- `GET /` - 예산 목록 조회
+- `POST /` - 예산 생성/수정 (월별)
+- `GET /status` - 예산 현황 조회 (예산 대비 지출)
+- `GET /{budget_id}` - 예산 조회
+- `PUT /{budget_id}` - 예산 수정
+- `DELETE /{budget_id}` - 예산 삭제
+
 ## 🧪 Testing
 
 ```bash
@@ -190,13 +221,16 @@ alembic downgrade -1
 ## 📊 구현 현황
 
 ✅ **완료된 작업**
-- 9개 ORM 모델 (Users, Groups, Transactions, Categories, etc.)
-- 4개 Repository 인터페이스 및 구현체
-- 4개 Service (Auth, Group, Transaction, Category)
-- 20개 API 엔드포인트
+- 9개 ORM 모델 (Users, Groups, Transactions, Categories, RecurringRules, Budgets, etc.)
+- 9개 Repository 인터페이스 및 구현체 (Auth, Group, Transaction, Category, Statistics, RecurringRule, Budget)
+- 8개 Service (Auth, Group, Transaction, Category, Statistics, Dashboard, RecurringRule, RecurringScheduler, Budget)
+- 40개+ API 엔드포인트 (인증, 그룹, 거래, 카테고리, 통계, 대시보드, 반복 거래, 예산)
 - JWT 인증 시스템
 - 데이터베이스 마이그레이션
 - Swagger 문서화
+- 통계 및 대시보드 최적화된 쿼리
+- 반복 거래 자동 생성 스케줄러
+- 예산 관리 및 현황 조회
 
 ## 📄 License
 

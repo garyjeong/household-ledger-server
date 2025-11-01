@@ -23,6 +23,7 @@ class TransactionService:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         category_id: Optional[int] = None,
+        search: Optional[str] = None,
         limit: int = 50,
         offset: int = 0
     ) -> tuple[list[Transaction], int]:
@@ -38,6 +39,7 @@ class TransactionService:
             start_date=start_date,
             end_date=end_date,
             category_id=category_id,
+            search=search,
             limit=limit,
             offset=offset
         )
@@ -47,7 +49,8 @@ class TransactionService:
             user_id=user_id,
             start_date=start_date,
             end_date=end_date,
-            category_id=category_id
+            category_id=category_id,
+            search=search
         )
         
         return transactions, total_count
