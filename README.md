@@ -94,7 +94,10 @@ JWT_REFRESH_SECRET=your-refresh-secret-change-in-production
 - `POST /login` - 로그인  
 - `POST /refresh` - 토큰 갱신
 - `GET /me` - 현재 사용자 정보
+- `PUT /me` - 프로필 수정
 - `POST /change-password` - 비밀번호 변경
+- `POST /forgot-password` - 비밀번호 찾기 (리셋 토큰 발급)
+- `POST /reset-password` - 비밀번호 재설정 (토큰으로)
 - `GET /check-email` - 이메일 중복 체크
 
 ### 👥 그룹 (Groups) - `/api/v1/groups`
@@ -150,6 +153,18 @@ JWT_REFRESH_SECRET=your-refresh-secret-change-in-production
 - `GET /{budget_id}` - 예산 조회
 - `PUT /{budget_id}` - 예산 수정
 - `DELETE /{budget_id}` - 예산 삭제
+
+### 💵 잔액 (Balance) - `/api/v1/balance`
+- `GET /` - 잔액 조회
+  - 현재 잔액 (현재 시점 기준 총 수입 - 총 지출)
+  - 예상 잔액 (미래 N개월 예상 잔액)
+  - 월별 추이 (지정 기간 동안의 월별 잔액 변화)
+  - 필터: `group_id`, `include_projection`, `projection_months`, `period`
+
+### ⚙️ 설정 (Settings) - `/api/v1/settings`
+- `GET /` - 설정 조회 (사용자 설정 JSON)
+- `PUT /` - 설정 수정 (사용자 설정 저장)
+- `DELETE /` - 설정 초기화 (기본값으로 리셋)
 
 ## 🧪 Testing
 
@@ -222,15 +237,17 @@ alembic downgrade -1
 
 ✅ **완료된 작업**
 - 9개 ORM 모델 (Users, Groups, Transactions, Categories, RecurringRules, Budgets, etc.)
-- 9개 Repository 인터페이스 및 구현체 (Auth, Group, Transaction, Category, Statistics, RecurringRule, Budget)
-- 8개 Service (Auth, Group, Transaction, Category, Statistics, Dashboard, RecurringRule, RecurringScheduler, Budget)
-- 40개+ API 엔드포인트 (인증, 그룹, 거래, 카테고리, 통계, 대시보드, 반복 거래, 예산)
-- JWT 인증 시스템
+- 10개 Repository 인터페이스 및 구현체 (Auth, Group, Transaction, Category, Statistics, RecurringRule, Budget, Balance, Settings)
+- 10개 Service (Auth, Group, Transaction, Category, Statistics, Dashboard, RecurringRule, RecurringScheduler, Budget, Balance, Settings)
+- 50개+ API 엔드포인트 (인증, 그룹, 거래, 카테고리, 통계, 대시보드, 반복 거래, 예산, 잔액, 설정)
+- JWT 인증 시스템 (토큰 갱신, 비밀번호 찾기/재설정)
 - 데이터베이스 마이그레이션
 - Swagger 문서화
 - 통계 및 대시보드 최적화된 쿼리
 - 반복 거래 자동 생성 스케줄러
 - 예산 관리 및 현황 조회
+- 잔액 계산 및 예상 잔액 조회
+- 사용자 설정 관리 (JSON 기반)
 
 ## 📄 License
 
